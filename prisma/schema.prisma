@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Participant {
+  id               String       @id @default(cuid())
+  nom              String
+  prenom           String
+  telephone        String
+  email            String
+  statut           Statut       // ESATIC_CCEE | ANCIEN | EXTERNE
+  hash             String       @unique // SHA256(email+telephone) anti-doublon
+  qrToken          String?      @unique
+  tshirtPaye       Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  commandes        Commande[]
+  paiements        Paiement[]
+}
+
+model Commande {
+  id            String         @id @default(cuid())
+  participantId String
+  participant   Participant    @relation(fields: [participantId], references: [id])
+  article       String         // bracelet | casquette | badge | autre
+  quantite      Int
+  prix          Float
+  statut        StatutPaiement @default(EN_ATTENTE)
+}
+
+model Paiement {
+  id              String         @id @default(cuid())
+  participantId   String
+  participant     Participant    @relation(fields: [participantId], references: [id])
+  montant         Float
+  operateur       String         // wave
+  transactionId   String         @unique
+  statut          StatutPaiement @default(EN_ATTENTE)
+  createdAt       DateTime       @default(now())
+}
+
+enum Statut { 
+  ESATIC_CCEE 
+  ANCIEN 
+  EXTERNE 
+}
+
+enum StatutPaiement { 
+  EN_ATTENTE 
+  PAYE 
+  ECHOUE 
+}
