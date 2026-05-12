@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       // Sign JWT for admin
       const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '7d' })
       
-      cookies().set('admin_token', token, {
+      ;(await cookies()).set('admin_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

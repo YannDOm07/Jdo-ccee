@@ -7,14 +7,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_only_for_dev';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const token = cookies().get("participant_token")?.value;
+    const token = (await cookies()).get("participant_token")?.value;
     if (!token) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
     const payload: any = jwt.verify(token, JWT_SECRET);
-    const { id: commandeId } = params;
+    const { id: commandeId } = await params;
 
     // Vérifier que la commande appartient bien à ce participant
     const commande = await prisma.commande.findUnique({

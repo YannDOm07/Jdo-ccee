@@ -3,8 +3,9 @@ import { prisma } from "@/lib/prisma"
 import { CheckCircle, XCircle, AlertTriangle, User, Package, CreditCard } from "lucide-react"
 import Link from "next/link"
 
-export default async function ScanValidatePage({ params }: { params: { token: string } }) {
-  const { token } = params
+export default async function ScanValidatePage({ params }: { params: any }) {
+  // Handle both Next.js 14 and 15 params API safely
+  const token = typeof params?.then === 'function' ? (await params).token : params.token
 
   const payload = verifyParticipantToken(token) as any
 

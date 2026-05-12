@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_only_for_dev';
 export async function POST(req: NextRequest) {
   try {
     // 1. Verify admin session
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get("admin_token")?.value;
 
     if (!token) {

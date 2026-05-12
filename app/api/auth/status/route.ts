@@ -6,7 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_only_for_dev'
 
 export async function GET() {
   try {
-    const token = cookies().get("participant_token")?.value
+    const token = (await cookies()).get("participant_token")?.value
 
     if (!token) {
       return NextResponse.json({ loggedIn: false })
