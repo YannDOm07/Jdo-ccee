@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,7 +11,7 @@ import { DigitalTicket } from "@/components/DigitalTicket";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const [stage, setStage] = useState(0);
@@ -291,5 +291,13 @@ export default function ConfirmationPage() {
         }
       `}} />
     </div>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-[var(--gold)] font-display">Chargement...</div>}>
+      <ConfirmationContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
+import { StatutPaiement } from "@prisma/client"
 import { generateParticipantQR } from "@/lib/qrcode"
 import crypto from 'crypto'
 import jwt from "jsonwebtoken"
@@ -76,16 +77,16 @@ export async function POST(req: NextRequest) {
               if (itMatch) {
                 const it = parseInt(itMatch[0]);
                 let prix = it <= 8 ? 10000 : it === 14 ? 5000 : it === 13 ? 7000 : it === 12 ? 7500 : it === 11 ? 8000 : 10000;
-                return [{ article: `Frais d'inscription (${data.promo})`, quantite: 1, prix, statut: "EN_ATTENTE" }];
+                return [{ article: `Frais d'inscription (${data.promo})`, quantite: 1, prix, statut: StatutPaiement.EN_ATTENTE }];
               }
               return [];
             })() : []),
             // Goodies
-            ...(data.casquette_blanche ? [{ article: 'Casquette Blanche JDO', quantite: 1, prix: PRIX.CASQUETTE_BLANCHE, statut: "EN_ATTENTE" }] : []),
-            ...(data.casquette_noire ? [{ article: 'Casquette Noire JDO', quantite: 1, prix: PRIX.CASQUETTE_NOIRE, statut: "EN_ATTENTE" }] : []),
-            ...(data.casquette_verte ? [{ article: 'Casquette Verte JDO', quantite: 1, prix: PRIX.CASQUETTE_VERTE, statut: "EN_ATTENTE" }] : []),
-            ...(data.tshirt_beige ? [{ article: 'T-Shirt Beige JDO', quantite: 1, prix: PRIX.TSHIRT_BEIGE, statut: "EN_ATTENTE" }] : []),
-            ...(data.tshirt_vert ? [{ article: 'T-Shirt Vert JDO', quantite: 1, prix: PRIX.TSHIRT_VERT, statut: "EN_ATTENTE" }] : []),
+            ...(data.casquette_blanche ? [{ article: 'Casquette Blanche JDO', quantite: 1, prix: PRIX.CASQUETTE_BLANCHE, statut: StatutPaiement.EN_ATTENTE }] : []),
+            ...(data.casquette_noire ? [{ article: 'Casquette Noire JDO', quantite: 1, prix: PRIX.CASQUETTE_NOIRE, statut: StatutPaiement.EN_ATTENTE }] : []),
+            ...(data.casquette_verte ? [{ article: 'Casquette Verte JDO', quantite: 1, prix: PRIX.CASQUETTE_VERTE, statut: StatutPaiement.EN_ATTENTE }] : []),
+            ...(data.tshirt_beige ? [{ article: 'T-Shirt Beige JDO', quantite: 1, prix: PRIX.TSHIRT_BEIGE, statut: StatutPaiement.EN_ATTENTE }] : []),
+            ...(data.tshirt_vert ? [{ article: 'T-Shirt Vert JDO', quantite: 1, prix: PRIX.TSHIRT_VERT, statut: StatutPaiement.EN_ATTENTE }] : []),
           ]
         }
       },

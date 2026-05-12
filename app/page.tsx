@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocomotiveScroll } from "@/hooks/useLocomotiveScroll";
 import { HeroSection } from "@/components/HeroSection";
@@ -17,7 +16,6 @@ import { CartProvider } from "@/contexts/CartContext";
 export default function Home() {
   const { locomotive, update } = useLocomotiveScroll();
   const { isLoggedIn } = useAuth();
-  const searchParams = useSearchParams();
 
 
   // Force Locomotive to recalculate heights when everything is loaded
