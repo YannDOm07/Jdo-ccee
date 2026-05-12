@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prisma logs
+prisma_err.log
+prisma_err2.txt
+prisma_error.txt
+prisma_out.txt
+seed_err.log
+tmp_debug.ts
+update-goodies-prices.js
+update-goodies.js

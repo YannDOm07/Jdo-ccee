@@ -6,7 +6,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_only_for_dev'
 export async function generateParticipantQR(
   participantId: string, 
   email: string, 
-  statut: string
+  statut: string,
+  requestBaseUrl?: string
 ) {
   // Create signed JWT
   const token = jwt.sign(
@@ -15,8 +16,11 @@ export async function generateParticipantQR(
     { expiresIn: '90d' }
   )
 
-  // Generate Base64 QR code from the token
-  const qrCodeDataUrl = await QRCode.toDataURL(token, {
+  const resolvedBaseUrl = requestBaseUrl || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  const scanUrl = `${resolvedBaseUrl}/billet/${token}`
+
+  // Generate Base64 QR code from the scan URL
+  const qrCodeDataUrl = await QRCode.toDataURL(scanUrl, {
     errorCorrectionLevel: 'H',
     margin: 2,
     color: {
