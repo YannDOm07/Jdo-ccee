@@ -4,7 +4,7 @@ import { jwtVerify } from 'jose'
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback_secret_only_for_dev')
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   if (path.startsWith('/admin') && path !== '/admin/login') {
@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
     try {
       await jwtVerify(token, JWT_SECRET)
     } catch (err) {
-      console.error("Middleware Auth Error:", err)
+      console.error("Proxy Auth Error:", err)
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
   }

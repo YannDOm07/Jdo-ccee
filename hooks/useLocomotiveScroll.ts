@@ -16,7 +16,7 @@ export function useLocomotiveScroll() {
       const LocomotiveScroll = (await import("locomotive-scroll")).default;
 
       // @ts-ignore
-      scroll = new LocomotiveScroll({
+      scroll = new (LocomotiveScroll as any)({
         smooth: true,
         multiplier: 0.08, // Very smooth, almost oily
         smartphone: { smooth: true, multiplier: 0.1 },

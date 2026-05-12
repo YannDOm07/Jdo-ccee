@@ -44,7 +44,8 @@ export default async function ScanValidatePage({ params }: { params: any }) {
     )
   }
 
-  const isValid = participant.montant === 0 || participant.paiements.some((p: any) => p.statut === "PAYE")
+  const montantTotal = participant.commandes.reduce((acc, cmd: any) => acc + cmd.prix * cmd.quantite, 0)
+  const isValid = montantTotal === 0 || participant.paiements.some((p: any) => p.statut === "PAYE")
 
   return (
     <div className="min-h-screen bg-[var(--cream)] pb-20 selection:bg-[var(--gold)] selection:text-[var(--forest)]">

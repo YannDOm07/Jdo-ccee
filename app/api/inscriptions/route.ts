@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
       success: true, 
       participantId: participant.id, 
       montantTotal: data.montantTotal,
-      qrData: participant.qrData // Sera null si un paiement est attendu
+      qrData: participant.qrToken // Sera null si un paiement est attendu
     }, { status: 201 })
 
   } catch (error: any) {
