@@ -7,6 +7,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   isLoading: boolean;
   checkStatus: () => Promise<void>;
+  setLoggedIn: (val: boolean) => void;
   logout: () => Promise<void>;
 }
 
@@ -16,6 +17,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
+
+  const setLoggedIn = useCallback((val: boolean) => {
+    setIsLoggedIn(val);
+  }, []);
 
   const checkStatus = useCallback(async () => {
     try {
@@ -45,18 +50,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [checkStatus]);
 
   // Run on pathname changes but only if it's a page that might change auth state 
-  // (or just rely on the manual checkStatus call from components after login/logout)
-  // For now, let's keep it simple and update on pathname to match existing behavior but more efficiently.
   useEffect(() => {
-    // Only re-fetch if we are navigating to/from auth-sensitive pages
     const sensitivePages = ["/profil", "/inscription", "/connexion", "/"];
     if (sensitivePages.some(page => pathname === page || pathname.startsWith(page))) {
-       checkStatus();
+       // Only fetch if not already in a loading state to avoid redundant calls
+       if (!isLoading) checkStatus();
     }
-  }, [pathname, checkStatus]);
+  }, [pathname, checkStatus, isLoading]);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isLoading, checkStatus, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, isLoading, checkStatus, setLoggedIn, logout }}>
       {children}
     </AuthContext.Provider>
   );

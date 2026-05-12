@@ -14,7 +14,7 @@ type InscriptionStatus = "CCEE" | "ANCIEN" | "EXTERNE";
 export function InscriptionClient() {
   useLocomotiveScroll();
   const router = useRouter();
-  const { checkStatus } = useAuth();
+  const { setLoggedIn } = useAuth();
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showDesktopNotice, setShowDesktopNotice] = useState(false);
@@ -122,7 +122,7 @@ export function InscriptionClient() {
       }
 
       toast.success("Inscription réussie !");
-      await checkStatus();
+      setLoggedIn(true);
       
       if (total > 0) {
         if (isMobile()) {

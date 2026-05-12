@@ -8,7 +8,7 @@ import { Loader2, ArrowRight } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 
 export default function ConnexionPage() {
-  const { checkStatus } = useAuth()
+  const { setLoggedIn } = useAuth()
   const [email, setEmail] = useState("")
   const [telephone, setTelephone] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -31,7 +31,7 @@ export default function ConnexionPage() {
       }
 
       toast.success("✅ Heureux de vous revoir au Jardin !");
-      await checkStatus();
+      setLoggedIn(true);
       router.push("/profil");
     } catch (err: any) {
       toast.error(err.message || "Erreur lors de la connexion.");
@@ -49,7 +49,7 @@ export default function ConnexionPage() {
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-luminosity will-change-transform"
             style={{ 
-              backgroundImage: `url("https://images.unsplash.com/photo-1511497584788-876760111969?q=85&w=1200")`,
+              backgroundImage: `url("https://images.unsplash.com/photo-1511497584788-876760111969?q=60&w=800&auto=format")`,
               filter: "sepia(0.3) hue-rotate(-10deg) saturate(1.5)"
             }}
           />

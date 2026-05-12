@@ -56,7 +56,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       <motion.div key={pathname} className="min-h-screen">
         {/* The overlay that comes UP from bottom */}
         <motion.div

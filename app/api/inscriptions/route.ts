@@ -58,78 +58,57 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Gestion de la transaction de base de données
-    const participant = await prisma.$transaction(async (tx: any) => {
-      // 1. Créer le participant
-      const p = await tx.participant.create({
-        data: {
-          nom: data.nom.toUpperCase(),
-          prenom: data.prenom,
-          email: cleanEmail,
-          telephone: cleanPhone,
-          statut: data.statut,
-          promo: data.promo || null,
-          hash: hash,
+    // Gestion de la transaction de base de données - Optimisée pour réduire la latence
+    const participant = await prisma.participant.create({
+      data: {
+        nom: data.nom.toUpperCase(),
+        prenom: data.prenom,
+        email: cleanEmail,
+        telephone: cleanPhone,
+        statut: data.statut,
+        promo: data.promo || null,
+        hash: hash,
+        commandes: {
+          create: [
+            // Frais d'inscription (CCEE / ANCIEN)
+            ...((data.statut === "ESATIC_CCEE" || data.statut === "ANCIEN") && data.promo ? (() => {
+              const itMatch = data.promo.match(/\d+/);
+              if (itMatch) {
+                const it = parseInt(itMatch[0]);
+                let prix = it <= 8 ? 10000 : it === 14 ? 5000 : it === 13 ? 7000 : it === 12 ? 7500 : it === 11 ? 8000 : 10000;
+                return [{ article: `Frais d'inscription (${data.promo})`, quantite: 1, prix, statut: "EN_ATTENTE" }];
+              }
+              return [];
+            })() : []),
+            // Goodies
+            ...(data.casquette_blanche ? [{ article: 'Casquette Blanche JDO', quantite: 1, prix: PRIX.CASQUETTE_BLANCHE, statut: "EN_ATTENTE" }] : []),
+            ...(data.casquette_noire ? [{ article: 'Casquette Noire JDO', quantite: 1, prix: PRIX.CASQUETTE_NOIRE, statut: "EN_ATTENTE" }] : []),
+            ...(data.casquette_verte ? [{ article: 'Casquette Verte JDO', quantite: 1, prix: PRIX.CASQUETTE_VERTE, statut: "EN_ATTENTE" }] : []),
+            ...(data.tshirt_beige ? [{ article: 'T-Shirt Beige JDO', quantite: 1, prix: PRIX.TSHIRT_BEIGE, statut: "EN_ATTENTE" }] : []),
+            ...(data.tshirt_vert ? [{ article: 'T-Shirt Vert JDO', quantite: 1, prix: PRIX.TSHIRT_VERT, statut: "EN_ATTENTE" }] : []),
+          ]
         }
-      })
-
-      // 2. Créer les commandes
-      const commandes: any[] = []
-      
-      // a) Frais d'inscription (CCEE / ANCIEN) - Calculés en fonction de l'IT
-      if (data.statut === "ESATIC_CCEE" || data.statut === "ANCIEN") {
-        let fraisInscription = 0;
-        if (data.promo) {
-          const itMatch = data.promo.match(/\d+/);
-          if (itMatch) {
-            const it = parseInt(itMatch[0]);
-            if (it === 14) fraisInscription = 5000;
-            else if (it === 13) fraisInscription = 7000;
-            else if (it === 12) fraisInscription = 7500;
-            else if (it === 11) fraisInscription = 8000;
-            else if (it === 10 || it === 9) fraisInscription = 10000;
-            else if (it <= 8) fraisInscription = 10000; // Anciens
-          }
-        }
-        if (fraisInscription > 0) {
-          commandes.push({ 
-            participantId: p.id, 
-            article: `Frais d'inscription (${data.promo})`, 
-            quantite: 1, 
-            prix: fraisInscription,
-            statut: "EN_ATTENTE" // Paiement en espèces auprès de la communauté
-          })
-        }
+      },
+      include: {
+        commandes: true
       }
-
-      // c) Goodies
-      if (data.casquette_blanche) commandes.push({ participantId: p.id, article: 'Casquette Blanche JDO', quantite: 1, prix: PRIX.CASQUETTE_BLANCHE, statut: "EN_ATTENTE" })
-      if (data.casquette_noire) commandes.push({ participantId: p.id, article: 'Casquette Noire JDO', quantite: 1, prix: PRIX.CASQUETTE_NOIRE, statut: "EN_ATTENTE" })
-      if (data.casquette_verte) commandes.push({ participantId: p.id, article: 'Casquette Verte JDO', quantite: 1, prix: PRIX.CASQUETTE_VERTE, statut: "EN_ATTENTE" })
-      if (data.tshirt_beige) commandes.push({ participantId: p.id, article: 'T-Shirt Beige JDO', quantite: 1, prix: PRIX.TSHIRT_BEIGE, statut: "EN_ATTENTE" })
-      if (data.tshirt_vert) commandes.push({ participantId: p.id, article: 'T-Shirt Vert JDO', quantite: 1, prix: PRIX.TSHIRT_VERT, statut: "EN_ATTENTE" })
-
-      if (commandes.length > 0) {
-        await tx.commande.createMany({ data: commandes })
-      }
-
-      // 3. Générer le QR Code & le sauvegarder SI gratuit 
-      // Si c'est gratuit (Pas d'achats), on lui donne directement son QR Code.
-      let qrData = null
-      if (data.montantTotal === 0) {
-         const protocol = req.headers.get('x-forwarded-proto') || 'http'
-        const host = req.headers.get('host') || 'localhost:3000'
-        const requestBaseUrl = `${protocol}://${host}`
-        
-        qrData = await generateParticipantQR(p.id, p.email, p.statut, requestBaseUrl)
-         await tx.participant.update({
-            where: { id: p.id },
-            data: { qrToken: qrData.token }
-         })
-      }
-
-      return { ...p, qrData }
     })
+
+    // 3. Générer le QR Code & le sauvegarder SI gratuit (opération asynchrone mais locale)
+    let qrData = null
+    if (data.montantTotal === 0) {
+      const protocol = req.headers.get('x-forwarded-proto') || 'http'
+      const host = req.headers.get('host') || 'localhost:3000'
+      const requestBaseUrl = `${protocol}://${host}`
+      
+      qrData = await generateParticipantQR(participant.id, participant.email, participant.statut, requestBaseUrl)
+      
+      // Mise à jour finale du token (un seul petit appel)
+      await prisma.participant.update({
+        where: { id: participant.id },
+        data: { qrToken: qrData.token }
+      })
+    }
 
     // Auto-login: Set session cookie
     const token = jwt.sign(
