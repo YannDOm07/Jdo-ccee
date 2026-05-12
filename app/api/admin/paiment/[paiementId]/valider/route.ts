@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma"
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ paiementId: string }> }
+  { params }: { params: { paiementId: string } }
 ) {
   try {
-    const { paiementId } = await params
+    const { paiementId } = params
 
     // Mettre à jour le paiement
     const payment = await prisma.paiement.update({

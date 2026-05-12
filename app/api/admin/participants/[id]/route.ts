@@ -7,13 +7,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_only_for_dev';
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
 
     // 1. Verify admin session
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const token = cookieStore.get("admin_token")?.value;
 
     if (!token) {

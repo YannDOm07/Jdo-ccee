@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_only_for_dev';
 export async function PUT(req: NextRequest) {
   try {
     // 1. Verify admin session
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const token = cookieStore.get("admin_token")?.value;
     if (!token) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     

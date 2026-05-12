@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     }
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '7d' })
 
-    ;(await cookies()).set('participant_token', token, {
+    cookies().set('participant_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
